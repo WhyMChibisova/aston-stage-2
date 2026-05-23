@@ -65,12 +65,8 @@ public class CustomHashMap<K, V> {
         }
     }
 
-    private int hash(K key) {
+    private int hash(K key, int capacity) {
         return (key == null) ? 0 : Math.abs(key.hashCode()) % capacity;
-    }
-
-    private boolean keysEquals(K key1, K key2) {
-        return Objects.equals(key1, key2);
     }
 
     private void ensureCapacity() {
@@ -81,9 +77,7 @@ public class CustomHashMap<K, V> {
             for (Entry<K, V> entry : table) {
                 while (entry != null) {
                     Entry<K, V> nextEntry = entry.next;
-                    int newIndex = (entry.getKey() == null)
-                            ? 0
-                            : Math.abs(entry.getKey().hashCode()) % newCapacity;
+                    int newIndex = hash(entry.getKey(), newCapacity);
                     entry.next = newTable[newIndex];
                     newTable[newIndex] = entry;
                     entry = nextEntry;
@@ -98,7 +92,7 @@ public class CustomHashMap<K, V> {
     public V put(K key, V value) {
         ensureCapacity();
 
-        int index = hash(key);
+        int index = hash(key, capacity);
         Entry<K, V> current = table[index];
 
         if (current == null) {
@@ -109,7 +103,7 @@ public class CustomHashMap<K, V> {
 
         Entry<K, V> prev = null;
         while (current != null) {
-            if (keysEquals(current.getKey(), key)) {
+            if (Objects.equals(current.getKey(), key)) {
                 V oldValue = current.getValue();
                 current.setValue(value);
                 return oldValue;
@@ -125,11 +119,11 @@ public class CustomHashMap<K, V> {
     }
 
     public V get(K key) {
-        int index = hash(key);
+        int index = hash(key, capacity);
         Entry<K, V> current = table[index];
 
         while (current != null) {
-            if (keysEquals(current.getKey(), key)) {
+            if (Objects.equals(current.getKey(), key)) {
                 return current.getValue();
             }
             current = current.next;
@@ -139,12 +133,12 @@ public class CustomHashMap<K, V> {
     }
 
     public V remove(K key) {
-        int index = hash(key);
+        int index = hash(key, capacity);
         Entry<K, V> current = table[index];
         Entry<K, V> prev = null;
 
         while (current != null) {
-            if (keysEquals(current.getKey(), key)) {
+            if (Objects.equals(current.getKey(), key)) {
                 if (prev == null) {
                     table[index] = current.next;
                 } else {
