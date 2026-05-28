@@ -8,22 +8,26 @@ import ru.aston.hometask.module2.entity.User;
 
 @Slf4j
 public class HibernateSessionFactoryUtil {
-    private static SessionFactory sessionFactory;
+    private static volatile SessionFactory sessionFactory;
 
-    public HibernateSessionFactoryUtil() {
+    private HibernateSessionFactoryUtil() {
     }
 
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
-            try {
-                Configuration configuration = new Configuration().configure();
-                configuration.addAnnotatedClass(User.class);
-                StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
-                sessionFactory = configuration.buildSessionFactory(builder.build());
-                log.info("SessionFactory created successfully");
-            } catch (Exception e) {
-                log.error("SessionFactory creation failed: {}", e.getMessage());
-                throw new RuntimeException("Hibernate initialization failed: " + e.getMessage());
+            synchronized (HibernateSessionFactoryUtil.class) {
+                if (sessionFactory == null) {
+                    try {
+                        Configuration configuration = new Configuration().configure();
+                        configuration.addAnnotatedClass(User.class);
+                        StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
+                        sessionFactory = configuration.buildSessionFactory(builder.build());
+                        log.info("SessionFactory created successfully");
+                    } catch (Exception e) {
+                        log.error("SessionFactory creation failed: {}", e.getMessage());
+                        throw new RuntimeException("Hibernate initialization failed: " + e.getMessage());
+                    }
+                }
             }
         }
         return sessionFactory;
