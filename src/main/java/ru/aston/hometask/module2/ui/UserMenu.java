@@ -1,8 +1,10 @@
 package ru.aston.hometask.module2.ui;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.aston.hometask.module2.dao.UserRepositoryImpl;
 import ru.aston.hometask.module2.entity.User;
 import ru.aston.hometask.module2.service.UserService;
+import ru.aston.hometask.module2.util.HibernateSessionFactoryUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +24,7 @@ public class UserMenu extends Menu {
     private final UserService userService;
 
     public UserMenu() {
-        this.userService = new UserService();
+        this.userService = new UserService(new UserRepositoryImpl(HibernateSessionFactoryUtil.getSessionFactory()));
     }
 
     @Override
