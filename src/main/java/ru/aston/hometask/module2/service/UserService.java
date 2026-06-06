@@ -1,7 +1,6 @@
 package ru.aston.hometask.module2.service;
 
 import ru.aston.hometask.module2.dao.UserRepository;
-import ru.aston.hometask.module2.dao.UserRepositoryImpl;
 import ru.aston.hometask.module2.entity.User;
 
 import java.util.List;
@@ -10,8 +9,8 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService() {
-        this.userRepository = new UserRepositoryImpl();
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public User saveUser(String name, String email, Integer age) {

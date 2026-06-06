@@ -3,20 +3,25 @@ package ru.aston.hometask.module2.dao;
 import jakarta.persistence.NoResultException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import ru.aston.hometask.module2.entity.User;
-import ru.aston.hometask.module2.util.HibernateSessionFactoryUtil;
 
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 public class UserRepositoryImpl implements UserRepository {
+    private final SessionFactory sessionFactory;
+
+    public UserRepositoryImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
     @Override
     public User save(User user) {
         Transaction transaction = null;
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             session.persist(user);
             transaction.commit();
@@ -33,7 +38,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(Long id) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             User user = session.get(User.class, id);
             log.info("User with id {}: {}", id, user != null ? "found" : "unfound");
             return Optional.ofNullable(user);
@@ -45,7 +50,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> findAll() {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             List<User> users = session.createQuery("FROM User", User.class).list();
             log.info("Received {} users", users.size());
             return users;
@@ -58,7 +63,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User update(User user) {
         Transaction transaction = null;
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             User updatedUser = session.merge(user);
             transaction.commit();
@@ -76,7 +81,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void delete(Long id) {
         Transaction transaction = null;
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             User deletedUser = session.get(User.class, id);
             if (deletedUser != null) {
@@ -99,7 +104,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             User user = session.createQuery("FROM User WHERE email =: email", User.class)
                     .setParameter("email", email)
                     .getSingleResult();
